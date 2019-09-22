@@ -59,7 +59,7 @@ public class EchoServerHandler extends SimpleChannelHandler {
 
     @SuppressWarnings("unused")
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws ClassNotFoundException, IOException, ParseException {
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws ClassNotFoundException, IOException, ParseException, SQLException {
 
         int accOn, accOff, angel, distance, speedAlarm, locationStatus, gsenso, otflag, heartbeat, relaystatus, dragAlarm, analog1, analog2, alarm_data, reserve, Odometer;
         double speed = 0, speed1 = 0;
@@ -189,11 +189,12 @@ public class EchoServerHandler extends SimpleChannelHandler {
 
             String imei_no = ChannelBuffers.hexDump(imei).substring(1);
 
+            Connection connection = null;
             try {
 
-                Class.forName(driverClassName);
+                //Class.forName(driverClassName);
 
-                Connection connection = DriverManager.getConnection(url, username, password);
+                connection = DriverManager.getConnection(url, username, password);
 
                 String sql = "INSERT INTO LiveMap (accOn,accOff,angel,distance,speedAlarm,locationStatus,gsenso,"
                         + "otflag,heartbeat,relaystatus,dragAlarm,ignation,analog1,analog2,"
@@ -248,6 +249,8 @@ public class EchoServerHandler extends SimpleChannelHandler {
                 connection.close();
             } catch (SQLException ex) {
                 ex.printStackTrace();
+            } finally {
+                connection.close();
             }
         }
 
@@ -262,7 +265,7 @@ public class EchoServerHandler extends SimpleChannelHandler {
     }
 
     @SuppressWarnings("finally")
-    private String getAddress(String lng, String lat) throws IOException, org.json.simple.parser.ParseException {
+    private String getAddress(String lng, String lat) throws IOException {
 
         URL url = new URL("https://maps.googleapis.com/maps/api/geocode/json?latlng="
                 + lat + "," + lng + "&key=AIzaSyBD4-HGxk2r2CJAyo5zcITfsrtIF6SC0WU&sensor=false");
